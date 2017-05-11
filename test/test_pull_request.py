@@ -1,6 +1,7 @@
 import pytest
 
-from rbu.pull_request import setup_repo_for_pr
+from rbu.pull_request import (setup_repo_for_pr,
+                              commits_diff_between_branches)
 from test.consts import TEST_REPO_URL
 
 
@@ -15,3 +16,11 @@ def test_setup_pr_repo(repo):
     assert '_rbu_pr_branch' not in names
     names = {r.name for r in repo.remotes}
     assert '_rbu_upstream' not in names
+
+
+@pytest.mark.setup_repo
+def test_commits_diff_between_branches(setup_repo):
+    commits = commits_diff_between_branches('master', '_rbu_pr_branch', setup_repo)
+    assert len(commits) == 2
+    assert '404ddb8' in commits and commits['404ddb8'] == 'Changes nothing'
+    assert 'aa3edfe' in commits and commits['aa3edfe'] == 'Improves performance'

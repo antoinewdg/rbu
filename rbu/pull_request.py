@@ -1,4 +1,4 @@
-import os
+from collections import OrderedDict
 from contextlib import contextmanager
 
 from git import Repo
@@ -23,3 +23,13 @@ def setup_repo_for_pr(pr_id, repo, remote_url):
 
     repo.git.branch('-D', '_rbu_pr_branch')
     repo.git.remote('remove', '_rbu_upstream')
+
+
+def commits_diff_between_branches(base, divergent, repo):
+    commits = OrderedDict()
+    out = repo.git.log('--oneline', '{}..{}'.format(base, divergent))
+    for line in out.split('\n'):
+        sha, _, title = line.partition(' ')
+        commits[sha] = title
+
+    return commits
