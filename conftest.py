@@ -20,6 +20,7 @@ def setup_repo():
         repo = Git().clone(TEST_REPO_URL, 'test_repo')
     else:
         repo = Repo('test_repo')
+    os.chdir('test_repo')
 
     with setup_repo_for_pr(1, repo, TEST_REPO_URL):
         yield repo

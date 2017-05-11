@@ -1,8 +1,6 @@
 from collections import OrderedDict
 from contextlib import contextmanager
 
-from git import Repo
-
 
 @contextmanager
 def setup_repo_for_pr(pr_id, repo, remote_url):
@@ -26,6 +24,15 @@ def setup_repo_for_pr(pr_id, repo, remote_url):
 
 
 def commits_diff_between_branches(base, divergent, repo):
+    """
+    Get the commits in branch `divergent` that are not in `base`.
+    
+    :param base: 
+    :param divergent: 
+    :param repo: 
+    :return: an `OrderedDict whose keys are the sha1 of the commits
+            and values the commit titles
+    """
     commits = OrderedDict()
     out = repo.git.log('--oneline', '{}..{}'.format(base, divergent))
     for line in out.split('\n'):
