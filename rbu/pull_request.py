@@ -89,7 +89,7 @@ def generate_pr_comment(master_commit, commits, benchmarks_dir):
     # Individual benchmarks
     comment += '\n## Individual benchmarks\n'
 
-    for k, (sha, title) in enumerate(commits.items()):
+    for k, (sha, title) in enumerate(list(commits.items()) + [master_commit]):
         with open('{}/{}.txt'.format(benchmarks_dir, sha)) as f:
             bench = f.read()
         comment += _INDIVIDUAL_BENCH_TEMPLATE.format(sha=sha, title=title, body=bench)
