@@ -1,1 +1,3 @@
 gitpython
+requests
+py-cpuinfo
