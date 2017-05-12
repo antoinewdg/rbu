@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+# coding=utf-8
+
+import os
+from tempfile import TemporaryDirectory
+
+import click
+
+from rbu.github import benchmark_github_pr
+from rbu.cli_utils import (check_for_cargo_benchcmp,
+                           check_github_api_env_vars,
+                           check_environment_variable)
+
+
+@click.command()
+@click.argument('pr_ids', type=click.INT, nargs=-1)
+@click.option('--output-dir', '-o', default=None, help='output directory, if not set will '
+                                                       'be a temporary directory')
+@click.option('--upstream', '-u', default=None, help='url of the upstream repo, can be replaced '
+                                                     'by environment variable RBU_UPSTREAM_URL')
+def main(pr_ids, output_dir, upstream):
+    """
+    Run the benchmarks all commits on each PR and compare to master.
+
+    The benchmark results are saved in --output-dir, and a comment
+    with a summary will be automatically added to the PR.
+    This script requires the environment variables RBU_GH_USERNAME
+    and RBU_GH_TOKEN to contain respectively the Github username
+    and a personal access token.
+    """
+    check_for_cargo_benchcmp()
+    check_github_api_env_vars()
+
+    temp_dir = None
+    if output_dir is None:
+        temp_dir = TemporaryDirectory()
+        output_dir = temp_dir.name
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+
+    if upstream is None:
+        check_environment_variable('RBU_UPSTREAM_URL', 'if --upstream is not')
+        upstream = os.environ['RBU_UPSTREAM_URL']
+
+    for pr_id in pr_ids:
+        benchmark_github_pr(pr_id, upstream, output_dir)
+
+    # Cleanup if it's a temp dir
+    if temp_dir is not None:
+        temp_dir.cleanup()
+
+
+if __name__ == '__main__':
+    main()
