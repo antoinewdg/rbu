@@ -1,6 +1,6 @@
 
 running 1 test
-test bench_array_sum ... bench:     244,028 ns/iter (+/- 7,134)
+test bench_array_sum ... bench:     249,102 ns/iter (+/- 13,375)
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 1 measured
 

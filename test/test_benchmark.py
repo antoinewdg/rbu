@@ -5,11 +5,7 @@ from os.path import join, dirname
 import pytest
 
 from rbu.benchmark import benchmark_commits, compare_benchmarks
-
-COMMITS = {
-    '404ddb8': 'Changes nothing',
-    'aa3edfe': 'Improves performance'
-}
+from test.consts import COMMITS, ERRORED_COMMIT
 
 
 @pytest.mark.setup_repo
@@ -17,14 +13,18 @@ def test_benchmark_commits(setup_repo):
     with tempfile.TemporaryDirectory() as directory:
         benchmark_commits(COMMITS, setup_repo, directory)
 
-        result = glob.glob(join(directory, '*.txt'))
-        for sha in COMMITS:
-            assert join(directory, sha + '.txt') in result
+        result = set(glob.glob(join(directory, '*.txt')))
+        expected = {join(directory, sha + '.txt') for sha in COMMITS}
+
+        with open(join(directory, ERRORED_COMMIT + '.txt')) as f:
+            assert f.readline() == 'ERROR RUNNING BENCHMARK'
+        assert result == expected
 
 
 def test_compare_benchmarks():
     assets_dir = join(dirname(__file__), 'assets', 'benchmark_outputs')
-    comparisons = compare_benchmarks('24ec188', ['404ddb8', 'aa3edfe'], assets_dir)
+    comparisons = compare_benchmarks('24ec188', COMMITS.keys(), assets_dir)
 
-    assert comparisons['aa3edfe'] != 'no significant variations'
-    assert comparisons['404ddb8'] == 'no significant variations'
+    assert comparisons['1f4db65'] != 'no significant variations'
+    assert comparisons['21a29f0'] == 'no significant variations'
+    assert comparisons[ERRORED_COMMIT] == 'can not compared because benchmarking failed'
